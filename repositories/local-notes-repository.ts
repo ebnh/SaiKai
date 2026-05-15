@@ -1,7 +1,6 @@
 "use client";
 
 import { STORAGE_KEY } from "@/lib/constants";
-import { sampleNotes } from "@/lib/sample-data";
 import { NoteSchema, type Note, type NoteInput, type Session } from "@/lib/types";
 import { createId } from "@/lib/utils";
 import type { NotesRepository } from "@/repositories/notes-repository";
@@ -63,13 +62,13 @@ function ensureNoteShape(raw: Record<string, unknown>): Note {
 }
 
 function readNotes(): Note[] {
-  if (typeof window === "undefined") return sampleNotes;
+  if (typeof window === "undefined") return [];
 
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (!stored) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleNotes));
-      return sampleNotes;
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+      return [];
     }
 
     const parsed = JSON.parse(stored) as unknown[];
@@ -82,11 +81,11 @@ function readNotes(): Note[] {
     return notes;
   } catch {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleNotes));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
     } catch {
       return [];
     }
-    return sampleNotes;
+    return [];
   }
 }
 

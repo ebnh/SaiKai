@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { Button, Pill, SectionCard } from "@/components/ui";
+import { Button, EmptyState, Pill, SectionCard } from "@/components/ui";
 import type { Note } from "@/lib/types";
 import { formatDate, summarizeForCard } from "@/lib/utils";
 import { useNotes } from "@/providers/notes-provider";
@@ -31,7 +32,6 @@ type ResumePageNote = {
   workflowStateLabel: string;
   updatedAtLabel: string;
   tags: string[];
-  isMock?: boolean;
 };
 
 type ResumePromptLog = {
@@ -47,31 +47,6 @@ type ResumePromptLog = {
 };
 
 const RESUME_PROMPT_LOG_KEY = "a_resume_prompt_logs";
-
-const mockNote: ResumePageNote = {
-  id: "mock-black-hole",
-  title: "ブラックホールの温度",
-  category: "物理",
-  question: "ブラックホールが温度を持つとはどういう意味か",
-  answerSummary: [
-    "ホーキング放射によりブラックホールは温度を持つとみなされる",
-    "質量が大きいほど温度は低い"
-  ],
-  unresolvedQuestions: [
-    "エントロピーが面積比例なのはなぜか",
-    "負の熱容量をどう理解するか",
-    "数学的導出はどうなるか"
-  ],
-  understandingState: [
-    "ホーキング放射の概念は理解済み",
-    "エントロピーと熱力学的な意味づけは未整理"
-  ],
-  nextDirections: ["熱力学との接続", "情報理論との接続", "数式を含む厳密な導出"],
-  workflowStateLabel: "サンプル",
-  updatedAtLabel: "ダミーデータ",
-  tags: ["要再開"],
-  isMock: true
-};
 
 const resumeModes: Array<{ value: ResumeMode; description: string }> = [
   { value: "続きから学ぶ", description: "前回の理解を土台に、そのまま次の論点へ進みます。" },
@@ -184,9 +159,8 @@ export function ResumePromptBuilderScreen() {
     () => notes.filter((note) => note.status === "active").map(noteToResumePageNote),
     [notes]
   );
-  const availableNotes = savedNotes.length > 0 ? savedNotes : [mockNote];
 
-  const [selectedNoteId, setSelectedNoteId] = useState<string>(availableNotes[0]?.id ?? mockNote.id);
+  const [selectedNoteId, setSelectedNoteId] = useState<string>("");
   const [currentQuestion, setCurrentQuestion] = useState("前回の続きから説明してほしい");
   const [selectedUnresolvedQuestions, setSelectedUnresolvedQuestions] = useState<string[]>([]);
   const [selectedResumeMode, setSelectedResumeMode] = useState<ResumeMode>("未解決点を深掘りする");
@@ -197,24 +171,30 @@ export function ResumePromptBuilderScreen() {
   const [promptLogs, setPromptLogs] = useState<ResumePromptLog[]>([]);
 
   const selectedNote = useMemo(
-    () => availableNotes.find((note) => note.id === selectedNoteId) ?? availableNotes[0],
-    [availableNotes, selectedNoteId]
+    () => savedNotes.find((note) => note.id === selectedNoteId) ?? savedNotes[0] ?? null,
+    [savedNotes, selectedNoteId]
   );
 
   useEffect(() => {
     const requestedNoteId = searchParams.get("noteId");
-    if (requestedNoteId && availableNotes.some((note) => note.id === requestedNoteId)) {
+    if (requestedNoteId && savedNotes.some((note) => note.id === requestedNoteId)) {
       setSelectedNoteId(requestedNoteId);
+      return;
     }
-  }, [availableNotes, searchParams]);
+    if (!selectedNoteId && savedNotes[0]) {
+      setSelectedNoteId(savedNotes[0].id);
+    }
+  }, [savedNotes, searchParams, selectedNoteId]);
 
   useEffect(() => {
-    if (!availableNotes.some((note) => note.id === selectedNoteId)) {
-      setSelectedNoteId(availableNotes[0]?.id ?? mockNote.id);
+    if (selectedNoteId && !savedNotes.some((note) => note.id === selectedNoteId)) {
+      setSelectedNoteId(savedNotes[0]?.id ?? "");
     }
-  }, [availableNotes, selectedNoteId]);
+  }, [savedNotes, selectedNoteId]);
 
   useEffect(() => {
+    if (!selectedNote) return;
+
     setSelectedUnresolvedQuestions((current) => {
       const matched = current.filter((item) => selectedNote.unresolvedQuestions.includes(item));
       return matched;
@@ -233,6 +213,22 @@ export function ResumePromptBuilderScreen() {
       setPromptLogs([]);
     }
   }, []);
+
+  if (!selectedNote) {
+    return (
+      <AppShell activeCount={activeCount} trashCount={trashCount}>
+        <EmptyState
+          title="再開できるノートがまだありません"
+          description="まずは取り込み画面から会話をノートとして保存すると、ここで再開用プロンプトを作れるようになります。"
+          action={
+            <Link href="/import">
+              <Button>会話を取り込む</Button>
+            </Link>
+          }
+        />
+      </AppShell>
+    );
+  }
 
   const generatedPrompt = useMemo(() => {
     const selectedQuestionBlock =
@@ -364,7 +360,7 @@ export function ResumePromptBuilderScreen() {
                 onChange={(event) => setSelectedNoteId(event.target.value)}
                 className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay"
               >
-                {availableNotes.map((note) => (
+                {savedNotes.map((note) => (
                   <option key={note.id} value={note.id}>
                     {note.title}
                   </option>
@@ -379,8 +375,7 @@ export function ResumePromptBuilderScreen() {
                 <div className="flex flex-wrap gap-2">
                   <Pill className="bg-clay/10 text-clay">{selectedNote.category}</Pill>
                   <Pill className="bg-moss/10 text-moss">{selectedNote.workflowStateLabel}</Pill>
-                  {selectedNote.isMock ? <Pill className="bg-clay/10 text-clay">サンプル</Pill> : null}
-                  <Pill>{availableNotes.length}件から選択</Pill>
+                  <Pill>{savedNotes.length}件から選択</Pill>
                 </div>
                 <h3 className="mt-3 text-lg font-semibold text-ink">{selectedNote.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-ink/70">{summarizeForCard(selectedNote.question, 110)}</p>
@@ -404,7 +399,7 @@ export function ResumePromptBuilderScreen() {
               <div className="flex flex-wrap items-center gap-2">
                 <Pill className="bg-clay/10 text-clay">{selectedNote.category}</Pill>
                 <Pill className="bg-moss/10 text-moss">
-                  {selectedNote.isMock ? "サンプルノート" : "保存済みノート"}
+                  保存済みノート
                 </Pill>
               </div>
               <h3 className="mt-4 text-2xl font-semibold text-ink">{selectedNote.title}</h3>

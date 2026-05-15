@@ -40,8 +40,8 @@ npm run dev
 
 ## OpenAI API 設定
 
-- OpenAI 呼び出しはクライアントから直接行わず、[`app/api/notes/generate/route.ts`](/Users/yuga/Documents/AIチャット整理アプリ（仮）/app/api/notes/generate/route.ts) 経由でサーバー側から実行します。
-- 実処理は [`lib/openai/client.ts`](/Users/yuga/Documents/AIチャット整理アプリ（仮）/lib/openai/client.ts) と [`lib/openai/generate-note.ts`](/Users/yuga/Documents/AIチャット整理アプリ（仮）/lib/openai/generate-note.ts) に分離しています。
+- OpenAI 呼び出しはクライアントから直接行わず、[`app/api/notes/generate/route.ts`](/Users/yuga/github/SaiKai/app/api/notes/generate/route.ts) 経由でサーバー側から実行します。
+- 実処理は [`lib/openai/client.ts`](/Users/yuga/github/SaiKai/lib/openai/client.ts) と [`lib/openai/generate-note.ts`](/Users/yuga/github/SaiKai/lib/openai/generate-note.ts) に分離しています。
 - モデルは `OPENAI_MODEL` で切り替えでき、未指定時は `gpt-5.4-mini` を使います。
 - API キー未設定、API 失敗、Structured Output の検証失敗時は自動でフォールバック生成に切り替わります。
 
@@ -108,7 +108,7 @@ repositories/                  # 永続化インターフェースと localStora
 ## トークン節約方針
 
 - 生成 API は保存前のノート化時だけ呼びます。
-- 圧縮処理は [`lib/openai/compression.ts`](/Users/yuga/Documents/AIチャット整理アプリ（仮）/lib/openai/compression.ts) に集約しています。
+- 圧縮処理は [`lib/openai/compression.ts`](/Users/yuga/github/SaiKai/lib/openai/compression.ts) に集約しています。
 - 圧縮は次の優先順です。
   - `existing-note-diff`: 既存ノート要約 + 今回の差分会話
   - `recent-turns`: 直近 N ターン
