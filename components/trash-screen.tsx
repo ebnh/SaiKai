@@ -40,8 +40,8 @@ export function TrashScreen() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">ゴミ箱</p>
-              <h2 className="mt-2 text-2xl font-semibold">復元前の保留スペース</h2>
-              <p className="mt-2 text-sm leading-6 text-ink/70">
+              <h2 className="mt-2 text-2xl font-semibold dark:text-white">復元前の保留スペース</h2>
+              <p className="mt-2 text-sm leading-6 text-ink/70 dark:text-slate-200">
                 誤って捨てる不安を減らすため、ノートは一定期間ここに残ります。
               </p>
             </div>
@@ -71,7 +71,7 @@ export function TrashScreen() {
                 onToggleSelect={toggleSelect}
                 viewMode="list"
                 hideSummary
-                extraBadge={<Pill className="bg-rose-100">残り {getTrashDaysLeft(note.deletedAt)} 日</Pill>}
+                extraBadge={<Pill className="bg-rose-100 text-rose-900 dark:border-[#4a2f35] dark:bg-[#3a252c] dark:text-rose-100">残り {getTrashDaysLeft(note.deletedAt)} 日</Pill>}
                 actions={
                   <>
                     <Button variant="secondary" onClick={() => restoreNotes([note.id])}>

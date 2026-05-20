@@ -8,6 +8,7 @@ import { Button, EmptyState, Pill, SectionCard } from "@/components/ui";
 import type { Note } from "@/lib/types";
 import { formatDate, summarizeForCard } from "@/lib/utils";
 import { useNotes } from "@/providers/notes-provider";
+import { useTheme } from "@/providers/theme-provider";
 
 type ResumeMode =
   | "続きから学ぶ"
@@ -123,23 +124,23 @@ function CollapsibleList({
   const accentClass = accent === "clay" ? "bg-clay" : "bg-moss";
 
   return (
-    <div className="rounded-[24px] border border-mist/80 bg-sand/55 p-4">
+    <div className="rounded-[24px] border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-none dark:bg-[#18212d]">
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-sm font-semibold text-ink">{title}</h3>
+        <h3 className="text-sm font-semibold text-ink dark:text-white">{title}</h3>
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
-          className="text-xs font-medium text-moss transition hover:text-ink"
+          className="text-xs font-medium text-moss transition hover:text-ink dark:text-emerald-200/80 dark:hover:text-white"
         >
           {expanded ? "折りたたむ" : "表示する"}
         </button>
       </div>
       <div className={expanded ? "mt-3" : "mt-3 line-clamp-3"}>
-        <ul className="space-y-3 text-sm leading-7 text-ink/80">
+        <ul className="space-y-3 text-sm leading-7 text-ink/80 dark:text-white">
           {items.map((item) => (
             <li key={item} className="flex gap-3">
               <span className={`mt-2 h-1.5 w-1.5 rounded-full ${accentClass}`} />
-              <span>{item}</span>
+              <span className="dark:text-white">{item}</span>
             </li>
           ))}
         </ul>
@@ -152,6 +153,7 @@ export function ResumePromptBuilderScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { notes } = useNotes();
+  const { theme } = useTheme();
   const activeCount = useMemo(() => notes.filter((note) => note.status === "active").length, [notes]);
   const trashCount = useMemo(() => notes.filter((note) => note.status === "trashed").length, [notes]);
 
@@ -332,12 +334,12 @@ export function ResumePromptBuilderScreen() {
   return (
     <AppShell activeCount={activeCount} trashCount={trashCount}>
       <div className="space-y-6">
-        <SectionCard className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(233,239,245,0.92))]">
+        <SectionCard className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(233,239,245,0.92))] dark:bg-none dark:bg-[#10161d]">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <p className="text-xs font-medium uppercase tracking-[0.24em] text-moss">Resume Page</p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink">対話を再開する</h1>
-              <p className="mt-3 text-sm leading-7 text-ink/70">
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink dark:text-white">対話を再開する</h1>
+              <p className="mt-3 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 保存済みノートをもとに、今回の目的に合った再開用プロンプトを作成します
               </p>
             </div>
@@ -349,8 +351,8 @@ export function ResumePromptBuilderScreen() {
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">再開するノート</p>
-              <h2 className="mt-2 text-xl font-semibold">今回の出発点</h2>
-              <p className="mt-2 text-sm leading-7 text-ink/70">
+              <h2 className="mt-2 text-xl font-semibold dark:text-white">今回の出発点</h2>
+              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 ここでノートを1つ選ぶと、下の文脈表示と再開条件がその内容に切り替わります。
               </p>
             </div>
@@ -358,7 +360,7 @@ export function ResumePromptBuilderScreen() {
               <select
                 value={selectedNote.id}
                 onChange={(event) => setSelectedNoteId(event.target.value)}
-                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay"
+                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
               >
                 {savedNotes.map((note) => (
                   <option key={note.id} value={note.id}>
@@ -369,18 +371,18 @@ export function ResumePromptBuilderScreen() {
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-mist/80 bg-sand/55 p-4">
+          <div className="rounded-[24px] border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-none dark:bg-[#18212d]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap gap-2">
-                  <Pill className="bg-clay/10 text-clay">{selectedNote.category}</Pill>
-                  <Pill className="bg-moss/10 text-moss">{selectedNote.workflowStateLabel}</Pill>
-                  <Pill>{savedNotes.length}件から選択</Pill>
+                  <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]">{selectedNote.category}</Pill>
+                  <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100">{selectedNote.workflowStateLabel}</Pill>
+                  <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{savedNotes.length}件から選択</Pill>
                 </div>
-                <h3 className="mt-3 text-lg font-semibold text-ink">{selectedNote.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-ink/70">{summarizeForCard(selectedNote.question, 110)}</p>
+                <h3 className="mt-3 text-lg font-semibold text-ink dark:text-white">{selectedNote.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>{summarizeForCard(selectedNote.question, 110)}</p>
               </div>
-              <p className="shrink-0 text-xs text-ink/45">{selectedNote.updatedAtLabel}</p>
+              <p className="shrink-0 text-xs text-ink/45 dark:text-slate-400">{selectedNote.updatedAtLabel}</p>
             </div>
           </div>
         </SectionCard>
@@ -390,21 +392,21 @@ export function ResumePromptBuilderScreen() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">保存済みノート</p>
-                <h2 className="mt-2 text-xl font-semibold">前回までの文脈</h2>
+                <h2 className="mt-2 text-xl font-semibold dark:text-white">前回までの文脈</h2>
               </div>
               <Button variant="ghost">元チャットを表示</Button>
             </div>
 
-            <div className="rounded-[28px] border border-mist/80 bg-[linear-gradient(180deg,rgba(247,244,238,0.95),rgba(255,255,255,0.82))] p-5">
+            <div className="rounded-[28px] border border-mist/80 bg-[linear-gradient(180deg,rgba(247,244,238,0.95),rgba(255,255,255,0.82))] p-5 dark:border-[#314155] dark:bg-none dark:bg-[#18212d]">
               <div className="flex flex-wrap items-center gap-2">
-                <Pill className="bg-clay/10 text-clay">{selectedNote.category}</Pill>
-                <Pill className="bg-moss/10 text-moss">
+                <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]">{selectedNote.category}</Pill>
+                <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100">
                   保存済みノート
                 </Pill>
               </div>
-              <h3 className="mt-4 text-2xl font-semibold text-ink">{selectedNote.title}</h3>
-              <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-ink/45">元の問い</p>
-              <p className="mt-2 text-sm leading-7 text-ink/80">{selectedNote.question}</p>
+              <h3 className="mt-4 text-2xl font-semibold text-ink dark:text-white">{selectedNote.title}</h3>
+              <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-ink/45 dark:text-slate-400">元の問い</p>
+              <p className="mt-2 text-sm leading-7 text-ink/80 dark:text-white">{selectedNote.question}</p>
             </div>
 
             <CollapsibleList title="答えの要点" items={selectedNote.answerSummary} accent="clay" />
@@ -424,25 +426,25 @@ export function ResumePromptBuilderScreen() {
           <SectionCard className="space-y-5">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">今回の再開条件</p>
-              <h2 className="mt-2 text-xl font-semibold">今回の意図を足していく</h2>
-              <p className="mt-2 text-sm leading-7 text-ink/70">
+              <h2 className="mt-2 text-xl font-semibold dark:text-white">今回の意図を足していく</h2>
+              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100">
                 前回の理解を見ながら、今知りたいことと回答の望み方をここで整えます。
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-ink">今回AIに聞きたいこと</label>
+              <label className="text-sm font-semibold text-ink dark:text-white">今回AIに聞きたいこと</label>
               <textarea
                 value={currentQuestion}
                 onChange={(event) => setCurrentQuestion(event.target.value)}
                 rows={5}
                 placeholder="前回の続きから説明してほしい"
-                className="w-full rounded-[24px] border border-mist bg-sand px-4 py-3 text-sm leading-7 outline-none transition placeholder:text-ink/35 focus:border-clay"
+                className="w-full rounded-[24px] border border-mist bg-sand px-4 py-3 text-sm leading-7 outline-none transition placeholder:text-ink/35 focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-[#d79374]"
               />
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-ink">今回特に扱いたい未解決点</label>
+              <label className="text-sm font-semibold text-ink dark:text-white">今回特に扱いたい未解決点</label>
               <div className="space-y-2">
                 {selectedNote.unresolvedQuestions.map((item) => {
                   const checked = selectedUnresolvedQuestions.includes(item);
@@ -450,7 +452,7 @@ export function ResumePromptBuilderScreen() {
                     <label
                       key={item}
                       className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 text-sm transition ${
-                        checked ? "border-clay bg-clay/5" : "border-mist bg-sand/55 hover:bg-sand"
+                        checked ? "border-clay bg-clay/5 dark:bg-[#b86f5220]" : "border-mist bg-sand/55 hover:bg-sand dark:border-[#314155] dark:bg-[#18212d] dark:hover:bg-white/10"
                       }`}
                     >
                       <input
@@ -459,7 +461,7 @@ export function ResumePromptBuilderScreen() {
                         onChange={() => toggleQuestion(item)}
                         className="mt-1 h-4 w-4 rounded border-mist text-clay focus:ring-clay"
                       />
-                      <span className="leading-7 text-ink/85">{item}</span>
+                      <span className="leading-7 text-ink/85 dark:text-white">{item}</span>
                     </label>
                   );
                 })}
@@ -467,7 +469,7 @@ export function ResumePromptBuilderScreen() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-ink">再開モード</label>
+              <label className="text-sm font-semibold text-ink dark:text-white">再開モード</label>
               <div className="grid gap-3 md:grid-cols-2">
                 {resumeModes.map((option) => (
                   <button
@@ -476,19 +478,24 @@ export function ResumePromptBuilderScreen() {
                     onClick={() => setSelectedResumeMode(option.value)}
                     className={`rounded-[24px] border p-4 text-left transition ${
                       selectedResumeMode === option.value
-                        ? "border-ink bg-white shadow-card"
-                        : "border-mist bg-sand/55 hover:bg-sand focus:outline-none focus:ring-2 focus:ring-clay/30"
+                        ? "border-ink bg-white shadow-card dark:border-[#d79374] dark:bg-[#243140] dark:text-white"
+                        : "border-mist bg-sand/55 hover:bg-sand dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-clay/30"
                     }`}
                   >
-                    <p className="text-sm font-semibold text-ink">{option.value}</p>
-                    <p className="mt-2 text-sm leading-6 text-ink/65">{option.description}</p>
+                    <p className="text-sm font-semibold text-ink dark:text-white">{option.value}</p>
+                    <p
+                      className="mt-2 text-sm leading-6 text-ink/65 dark:text-slate-200"
+                      style={theme === "dark" ? { color: "#e2e8f0" } : undefined}
+                    >
+                      {option.description}
+                    </p>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-ink">回答スタイル</label>
+              <label className="text-sm font-semibold text-ink dark:text-white">回答スタイル</label>
               <div className="flex flex-wrap gap-2">
                 {answerStyles.map((style) => (
                   <button
@@ -497,9 +504,10 @@ export function ResumePromptBuilderScreen() {
                     onClick={() => setSelectedAnswerStyle(style)}
                     className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                       selectedAnswerStyle === style
-                        ? "border-ink bg-ink text-white"
-                        : "border-mist bg-sand text-ink hover:bg-mist"
+                        ? "border-ink bg-ink text-white dark:border-[#d79374] dark:bg-[#243140] dark:text-white"
+                        : "border-mist bg-sand text-ink hover:bg-mist dark:bg-white/6 dark:text-slate-100 dark:hover:bg-white/10 dark:border-[#314155] dark:bg-[#18212d] dark:text-slate-100 dark:hover:bg-white/10"
                     }`}
+                    style={theme === "dark" ? { color: "#f8fafc" } : undefined}
                   >
                     {style}
                   </button>
@@ -508,7 +516,7 @@ export function ResumePromptBuilderScreen() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-ink">深さ</label>
+              <label className="text-sm font-semibold text-ink dark:text-white">深さ</label>
               <div className="grid grid-cols-3 gap-2">
                 {depthOptions.map((depth) => (
                   <button
@@ -516,8 +524,9 @@ export function ResumePromptBuilderScreen() {
                     type="button"
                     onClick={() => setSelectedDepth(depth)}
                     className={`rounded-2xl px-3 py-3 text-sm font-medium transition ${
-                      selectedDepth === depth ? "bg-moss text-white" : "bg-sand text-ink hover:bg-mist"
+                      selectedDepth === depth ? "bg-moss text-white dark:bg-[#56654a] dark:text-white" : "bg-sand text-ink hover:bg-mist dark:bg-[#18212d] dark:text-slate-100 dark:hover:bg-white/10"
                     }`}
+                    style={theme === "dark" ? { color: "#f8fafc" } : undefined}
                   >
                     {depth}
                   </button>
@@ -526,12 +535,12 @@ export function ResumePromptBuilderScreen() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-ink">追加条件</label>
+              <label className="text-sm font-semibold text-ink dark:text-white">追加条件</label>
               <input
                 value={extraCondition}
                 onChange={(event) => setExtraCondition(event.target.value)}
                 placeholder="数式を省略しすぎないで"
-                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none transition placeholder:text-ink/35 focus:border-clay"
+                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none transition placeholder:text-ink/35 focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:placeholder:text-slate-400 dark:focus:border-[#d79374]"
               />
             </div>
           </SectionCard>
@@ -541,8 +550,8 @@ export function ResumePromptBuilderScreen() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">再開用プロンプト</p>
-              <h2 className="mt-2 text-2xl font-semibold">今このまま外部AIへ貼れる形にする</h2>
-              <p className="mt-2 text-sm leading-7 text-ink/70">
+              <h2 className="mt-2 text-2xl font-semibold dark:text-white">今このまま外部AIへ貼れる形にする</h2>
+              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 左の文脈と右の条件を合成して、今回の目的が伝わる1本の再開文を作ります。
               </p>
             </div>
@@ -557,14 +566,14 @@ export function ResumePromptBuilderScreen() {
             </div>
           </div>
 
-          <div className="rounded-[32px] border border-ink/10 bg-[linear-gradient(180deg,rgba(245,242,235,0.98),rgba(231,238,246,0.92))] p-5 md:p-6">
+          <div className="rounded-[32px] border border-ink/10 bg-[linear-gradient(180deg,rgba(245,242,235,0.98),rgba(231,238,246,0.92))] p-5 md:p-6 dark:border-[#314155] dark:bg-none dark:bg-[#10161d]">
             <div className="flex flex-wrap gap-2">
-              <Pill>{selectedResumeMode}</Pill>
-              <Pill>{selectedAnswerStyle}</Pill>
-              <Pill>{selectedDepth}</Pill>
+              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{selectedResumeMode}</Pill>
+              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{selectedAnswerStyle}</Pill>
+              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{selectedDepth}</Pill>
             </div>
-            <div className="mt-4 rounded-[24px] border border-white/70 bg-white/80 p-5 md:p-6">
-              <p className="whitespace-pre-wrap text-sm leading-8 text-ink/85">{generatedPrompt}</p>
+            <div className="mt-4 rounded-[24px] border border-white/70 bg-white/80 p-5 md:p-6 dark:border-[#314155] dark:bg-[#18212d]">
+              <p className="whitespace-pre-wrap text-sm leading-8 text-ink/85 dark:text-slate-200">{generatedPrompt}</p>
             </div>
           </div>
         </SectionCard>
@@ -573,8 +582,8 @@ export function ResumePromptBuilderScreen() {
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">再開ログ</p>
-              <h2 className="mt-2 text-xl font-semibold">直近で使った再開パターン</h2>
-              <p className="mt-2 text-sm leading-7 text-ink/70">
+              <h2 className="mt-2 text-xl font-semibold dark:text-white">直近で使った再開パターン</h2>
+              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 コピーした再開用プロンプトだけを軽いログとして残します。本体ノートとは別扱いです。
               </p>
             </div>
@@ -583,21 +592,21 @@ export function ResumePromptBuilderScreen() {
           {promptLogs.length > 0 ? (
             <div className="grid gap-3">
               {promptLogs.map((log) => (
-                <div key={log.id} className="rounded-[24px] border border-mist/80 bg-sand/55 p-4">
+                <div key={log.id} className="rounded-[24px] border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-[#18212d]">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Pill className="bg-moss/10 text-moss">{log.resumeMode}</Pill>
-                    <Pill className="bg-clay/10 text-clay">{log.answerStyle}</Pill>
-                    <Pill>{log.depth}</Pill>
+                    <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100">{log.resumeMode}</Pill>
+                    <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]">{log.answerStyle}</Pill>
+                    <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{log.depth}</Pill>
                   </div>
                   <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                    <h3 className="text-base font-semibold text-ink">{log.noteTitle}</h3>
-                    <p className="text-xs text-ink/45">{formatDate(log.createdAt)}</p>
+                    <h3 className="text-base font-semibold text-ink dark:text-white">{log.noteTitle}</h3>
+                    <p className="text-xs text-ink/45 dark:text-slate-400">{formatDate(log.createdAt)}</p>
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-ink/78">{summarizeForCard(log.questionSummary, 110)}</p>
+                  <p className="mt-3 text-sm leading-7 text-ink/78 dark:text-slate-200">{summarizeForCard(log.questionSummary, 110)}</p>
                   {log.selectedTopics.length > 0 ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {log.selectedTopics.map((topic) => (
-                        <Pill key={topic} className="bg-white text-ink/70">
+                        <Pill key={topic} className="bg-white text-ink/70 dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
                           {topic}
                         </Pill>
                       ))}
@@ -607,7 +616,7 @@ export function ResumePromptBuilderScreen() {
               ))}
             </div>
           ) : (
-            <div className="rounded-[24px] border border-dashed border-mist bg-sand/40 p-5 text-sm leading-7 text-ink/60">
+            <div className="rounded-[24px] border border-dashed border-mist bg-sand/40 p-5 text-sm leading-7 text-ink/60 dark:border-[#314155] dark:bg-none dark:bg-[#18212d] dark:text-slate-200">
               まだ履歴はありません。再開用プロンプトをコピーすると、ここに直近の再開ログが残ります。
             </div>
           )}

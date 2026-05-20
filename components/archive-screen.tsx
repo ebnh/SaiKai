@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ArchiveToolbar } from "@/components/archive-toolbar";
 import { NoteCard } from "@/components/note-card";
@@ -15,7 +15,7 @@ import { useNotes } from "@/providers/notes-provider";
 const NOTES_PER_PAGE = 10;
 
 export function ArchiveScreen() {
-  const { notes, isLoaded, trashNotes, bulkUpdateNotes } = useNotes();
+  const { notes, isLoaded, trashNotes, bulkUpdateNotes, importNotes } = useNotes();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<"all" | Category>("all");
   const [workflowState, setWorkflowState] = useState<"all" | WorkflowState>("all");
@@ -28,7 +28,8 @@ export function ArchiveScreen() {
   const [bulkCategory, setBulkCategory] = useState("");
   const [bulkState, setBulkState] = useState<"" | WorkflowState>("");
   const [bulkTags, setBulkTags] = useState<FixedTag[]>([]);
-  const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const activeNotes = useMemo(() => notes.filter((note) => note.status === "active"), [notes]);
   const trashCount = useMemo(() => notes.filter((note) => note.status === "trashed").length, [notes]);
@@ -122,7 +123,7 @@ export function ArchiveScreen() {
       app: "SaiKai",
       exportedAt: new Date().toISOString(),
       storageKey: STORAGE_KEY,
-      notes
+      notes: activeNotes
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json"
@@ -136,8 +137,42 @@ export function ArchiveScreen() {
     anchor.click();
     document.body.removeChild(anchor);
     window.URL.revokeObjectURL(url);
-    setExportMessage("ノートを JSON で書き出しました");
-    window.setTimeout(() => setExportMessage(null), 2200);
+    setStatusMessage("ゴミ箱を除いたノートを JSON で書き出しました");
+    window.setTimeout(() => setStatusMessage(null), 2200);
+  }
+
+  function handleOpenImportJson() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleImportJson(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const raw = await file.text();
+      const parsed = JSON.parse(raw);
+      const importedCandidates = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.notes)
+          ? parsed.notes
+          : parsed?.note
+            ? [parsed.note]
+            : [];
+
+      if (importedCandidates.length === 0) {
+        throw new Error("取り込めるノートが見つかりませんでした");
+      }
+
+      const result = await importNotes(importedCandidates);
+      setStatusMessage(`JSON から ${result.importedCount} 件のノートを取り込みました`);
+      window.setTimeout(() => setStatusMessage(null), 2200);
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "JSON の取り込みに失敗しました");
+      window.setTimeout(() => setStatusMessage(null), 2600);
+    } finally {
+      event.target.value = "";
+    }
   }
 
   return (
@@ -151,6 +186,13 @@ export function ArchiveScreen() {
       trashCount={trashCount}
     >
       <div className="space-y-6">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={(event) => void handleImportJson(event)}
+        />
         <ArchiveToolbar
           search={search}
           onSearchChange={setSearch}
@@ -166,11 +208,12 @@ export function ArchiveScreen() {
           onSelectAllVisible={() => setSelectedIds(visibleNotes.map((note) => note.id))}
           onTrashSelected={handleTrashSelected}
           onExportJson={handleExportJson}
+          onImportJson={handleOpenImportJson}
           currentCategory={category}
         />
-        {exportMessage ? (
+        {statusMessage ? (
           <SectionCard className="py-3">
-            <p className="text-sm font-medium text-emerald-700">{exportMessage}</p>
+            <p className="text-sm font-medium text-emerald-700">{statusMessage}</p>
           </SectionCard>
         ) : null}
 
@@ -295,7 +338,7 @@ export function ArchiveScreen() {
           </div>
 
             <SectionCard className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-ink/70">
+              <p className="text-sm text-ink/70 dark:text-slate-200">
                 {visibleNotes.length}冊中 {(currentPage - 1) * NOTES_PER_PAGE + 1}-
                 {Math.min(currentPage * NOTES_PER_PAGE, visibleNotes.length)}冊を表示
               </p>

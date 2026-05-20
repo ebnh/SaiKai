@@ -131,8 +131,8 @@ export function ImportResumedConversationScreen() {
         <div className="space-y-6">
           <SectionCard className="space-y-4">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">Import Resumed Conversation</p>
-            <h1 className="text-3xl font-semibold">新しい対話を取り込む</h1>
-            <p className="text-sm leading-7 text-ink/70">
+            <h1 className="text-3xl font-semibold dark:text-white">新しい対話を取り込む</h1>
+            <p className="text-sm leading-7 text-ink/70 dark:text-slate-200">
               外部AIで再開して得た新しい会話を、このノートの続きの Session として追加します。
             </p>
           </SectionCard>
@@ -141,12 +141,12 @@ export function ImportResumedConversationScreen() {
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">追加先のノート</p>
-                <h2 className="mt-2 text-xl font-semibold">どのノートに Session を追加するか選ぶ</h2>
+                <h2 className="mt-2 text-xl font-semibold dark:text-white">どのノートに Session を追加するか選ぶ</h2>
               </div>
               <select
                 value={note?.id ?? ""}
                 onChange={(event) => setSelectedNoteId(event.target.value)}
-                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay lg:max-w-sm"
+                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay lg:max-w-sm dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
               >
                 {activeNotes.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -160,17 +160,17 @@ export function ImportResumedConversationScreen() {
           <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <SectionCard className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                <Pill className="bg-clay/10 text-clay">{note.category}</Pill>
+                <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]">{note.category}</Pill>
                 <Pill>{note.sessions.length} Sessions</Pill>
                 <Pill className="bg-moss/10 text-moss">更新 {formatDate(note.updatedAt)}</Pill>
               </div>
-              <h2 className="text-2xl font-semibold">{note.title}</h2>
-              <div className="rounded-2xl bg-sand p-4">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-ink/45">今回の再開テーマ</p>
-                <p className="mt-2 text-sm leading-7 text-ink/80">{question}</p>
+              <h2 className="text-2xl font-semibold dark:text-white">{note.title}</h2>
+              <div className="rounded-2xl border border-transparent bg-sand p-4 dark:border-[#314155] dark:bg-[#18212d]">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-ink/45 dark:text-slate-400">今回の再開テーマ</p>
+                <p className="mt-2 text-sm leading-7 text-ink/80 dark:text-white">{question}</p>
               </div>
-              <div className="rounded-2xl bg-sand p-4">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-ink/45">現在の要点</p>
+              <div className="rounded-2xl border border-transparent bg-sand p-4 dark:border-[#314155] dark:bg-[#18212d]">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-ink/45 dark:text-slate-400">現在の要点</p>
                 <ul className="mt-2 space-y-2 text-sm leading-6 text-ink/80">
                   {note.answerSummary.map((item) => (
                     <li key={item}>- {item}</li>
@@ -182,20 +182,20 @@ export function ImportResumedConversationScreen() {
             <SectionCard className="space-y-4">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">外部AIの新しい会話</p>
-                <h2 className="mt-2 text-xl font-semibold">続きの対話を貼り付ける</h2>
+                <h2 className="mt-2 text-xl font-semibold dark:text-white">続きの対話を貼り付ける</h2>
               </div>
               <textarea
                 value={conversationText}
                 onChange={(event) => setConversationText(event.target.value)}
                 rows={12}
-                className="w-full rounded-[24px] border border-mist bg-sand px-4 py-4 text-sm leading-7 outline-none focus:border-clay"
+                className="w-full rounded-[24px] border border-mist bg-sand px-4 py-4 text-sm leading-7 outline-none focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
               />
 
-              <p className="text-xs leading-6 text-ink/55">
+              <p className="text-xs leading-6 text-ink/55 dark:text-slate-400">
                 追加時に API でこの会話を整理し、要点・疑問点・理解状態を Session とノート本体へ反映します。
               </p>
               {analysisInfo ? (
-                <p className="text-xs leading-6 text-ink/55">
+                <p className="text-xs leading-6 text-ink/55 dark:text-slate-400">
                   {analysisInfo.source === "llm" ? "LLM で整理して追加します。" : "フォールバック整理で追加します。"}
                   {analysisInfo.reason ? ` ${analysisInfo.reason}` : ""}
                 </p>

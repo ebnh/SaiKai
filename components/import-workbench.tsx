@@ -8,6 +8,7 @@ import { categories, fixedTags, GeneratedNoteSchema, workflowStates } from "@/li
 import { getCategoryOptions, normalizeCategory, normalizeFixedTags, toLineItems, uniqueStrings } from "@/lib/utils";
 import { Button, Pill, SectionCard } from "@/components/ui";
 import { useNotes } from "@/providers/notes-provider";
+import { useTheme } from "@/providers/theme-provider";
 
 type GenerateResponse = {
   note: GeneratedNote;
@@ -56,6 +57,7 @@ function deriveUnderstandingState(answerSummary: string[], unresolvedQuestions: 
 export function ImportWorkbench() {
   const router = useRouter();
   const { addOrUpdateNote, appendSessionToNote, notes } = useNotes();
+  const { theme } = useTheme();
   const [chatText, setChatText] = useState("");
   const [preview, setPreview] = useState<GeneratedNote>(emptyPreview);
   const [selectedTags, setSelectedTags] = useState<FixedTag[]>([]);
@@ -247,8 +249,8 @@ export function ImportWorkbench() {
       <SectionCard className="space-y-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">取り込み</p>
-          <h2 className="mt-2 text-2xl font-semibold">会話をノート化する</h2>
-          <p className="mt-2 text-sm leading-6 text-ink/70">
+          <h2 className="mt-2 text-2xl font-semibold dark:text-white">会話をノート化する</h2>
+          <p className="mt-2 text-sm leading-6 text-ink/70 dark:text-slate-200" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
             外部AIでやりとりした会話を貼り付けると、前処理で整えた会話を保存しつつ、問い・要点・残疑問を確認できます。
           </p>
         </div>
@@ -257,10 +259,10 @@ export function ImportWorkbench() {
           value={chatText}
           onChange={(event) => setChatText(event.target.value)}
           placeholder={"Q: 何を知りたい？\nA: どう整理すべき？\nQ: 次にどこを深掘りする？"}
-          className="min-h-[360px] w-full rounded-[24px] border border-mist bg-sand px-4 py-4 text-sm leading-6 outline-none placeholder:text-ink/35 focus:border-clay"
+          className="min-h-[360px] w-full rounded-[24px] border border-mist bg-sand px-4 py-4 text-sm leading-6 outline-none placeholder:text-ink/35 focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-[#d79374]"
         />
 
-        <div className="rounded-2xl bg-sand p-4 text-sm leading-6 text-ink/75">
+        <div className="rounded-2xl bg-sand p-4 text-sm leading-6 text-ink/75 dark:border dark:border-[#314155] dark:bg-[#18212d] dark:text-white">
           <p>
             貼り付け後は、ユーザー / AI の発話らしい部分を抽出し、明らかなメニュー文言や先頭末尾のノイズを除外してから解析します。
           </p>
@@ -302,9 +304,9 @@ export function ImportWorkbench() {
           {hasGeneratedOnce ? <Pill className="bg-clay/10 text-clay">下書き生成済み</Pill> : null}
         </div>
         {hasGeneratedOnce ? (
-          <div className="rounded-2xl border border-mist/80 bg-sand/55 p-4">
-            <p className="text-sm font-medium text-ink">生成結果は下書きです</p>
-            <p className="mt-2 text-sm leading-6 text-ink/70">
+          <div className="rounded-2xl border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-[#18212d]">
+            <p className="text-sm font-medium text-ink dark:text-slate-100">生成結果は下書きです</p>
+            <p className="mt-2 text-sm leading-6 text-ink/70 dark:text-slate-200">
               初回生成のあとは API を引き直すより、右側で問い・要点・残った疑問を整えて保存する使い方を基本にしています。
             </p>
           </div>
@@ -315,8 +317,8 @@ export function ImportWorkbench() {
           </p>
         ) : null}
         {hasGeneratedOnce ? (
-          <details className="rounded-2xl bg-sand p-4">
-            <summary className="cursor-pointer text-sm font-medium text-ink">生成し直す（必要なときだけ）</summary>
+          <details className="rounded-2xl border border-transparent bg-sand p-4 dark:border-[#314155] dark:bg-[#18212d]">
+            <summary className="cursor-pointer text-sm font-medium text-ink dark:text-slate-100">生成し直す（必要なときだけ）</summary>
             <div className="mt-3 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="secondary" onClick={handleRegenerate} disabled={!canRegenerate}>
@@ -328,7 +330,7 @@ export function ImportWorkbench() {
                 </Button>
                 <Pill>再生成 {regenerateCount} / {MAX_REGENERATE_COUNT}</Pill>
               </div>
-              <p className="text-xs leading-6 text-ink/55">
+              <p className="text-xs leading-6 text-ink/55 dark:text-slate-200">
                 再生成では API 利用料金が発生する場合があります。保存前の再生成は最大 {MAX_REGENERATE_COUNT} 回、各回の後に {REGENERATE_COOLDOWN_SECONDS} 秒の待機があります。
               </p>
             </div>
@@ -336,12 +338,12 @@ export function ImportWorkbench() {
         ) : null}
         {sourceReason ? <p className="text-sm leading-6 text-amber-700">{sourceReason}</p> : null}
         {compressionInfo ? (
-          <p className="text-xs leading-6 text-ink/55">
+          <p className="text-xs leading-6 text-ink/55 dark:text-slate-200">
             圧縮方式: {compressionInfo.mode} / 送信文字数 {compressionInfo.compressedLength} / 元文字数 {compressionInfo.originalLength}
           </p>
         ) : null}
         {preprocessingInfo ? (
-          <p className="text-xs leading-6 text-ink/55">
+          <p className="text-xs leading-6 text-ink/55 dark:text-slate-200">
             前処理: {preprocessingInfo.mode === "full" ? "全文解析" : "後半重視"} / 除去行数 {preprocessingInfo.removedLines} / 前処理後 {preprocessingInfo.cleanedLength}文字
           </p>
         ) : null}
@@ -358,15 +360,15 @@ export function ImportWorkbench() {
           </Button>
         </div>
         {hasGeneratedOnce ? (
-          <p className="text-sm leading-6 text-ink/65">
+          <p className="text-sm leading-6 text-ink/65 dark:text-slate-200">
             ここでは API を呼ばずに、生成された下書きをそのまま編集して保存できます。
           </p>
         ) : null}
 
-        <div className="space-y-3 rounded-2xl bg-sand p-4">
+        <div className="space-y-3 rounded-2xl border border-transparent bg-sand p-4 dark:border-[#314155] dark:bg-[#18212d]" style={theme === "dark" ? { backgroundColor: "#18212d" } : undefined}>
           <div className="space-y-1">
-            <p className="text-sm font-medium text-ink">どこに保存するか</p>
-            <p className="text-xs leading-6 text-ink/60">
+            <p className="text-sm font-medium text-ink dark:text-white">どこに保存するか</p>
+            <p className="text-xs leading-6 text-ink/60 dark:text-slate-200">
               新しいテーマとして保存するか、すでにあるノートの続きとして追加するかを選びます。
             </p>
           </div>
@@ -376,12 +378,12 @@ export function ImportWorkbench() {
               onClick={() => setSaveMode("new")}
               className={`rounded-2xl border px-4 py-3 text-left transition ${
                 saveMode === "new"
-                  ? "border-clay bg-white ring-2 ring-clay/15"
-                  : "border-transparent bg-white hover:bg-mist"
+                  ? "border-clay bg-white ring-2 ring-clay/15 dark:border-[#d79374] dark:bg-[#18212d]"
+                  : "border-transparent bg-white hover:bg-mist dark:bg-[#1d2835] dark:hover:bg-[#243140]"
               }`}
             >
-              <p className="text-sm font-medium text-ink">新しいノートとして保存</p>
-              <p className="mt-1 text-xs leading-6 text-ink/60">
+              <p className="text-sm font-medium text-ink dark:text-white">新しいノートとして保存</p>
+              <p className="mt-1 text-xs leading-6 text-ink/60 dark:text-slate-300">
                 今回の会話を独立した1冊のノートとして保存します。
               </p>
             </button>
@@ -390,23 +392,23 @@ export function ImportWorkbench() {
               onClick={() => setSaveMode("existing")}
               className={`rounded-2xl border px-4 py-3 text-left transition ${
                 saveMode === "existing"
-                  ? "border-clay bg-white ring-2 ring-clay/15"
-                  : "border-transparent bg-white hover:bg-mist"
+                  ? "border-clay bg-white ring-2 ring-clay/15 dark:border-[#d79374] dark:bg-[#18212d]"
+                  : "border-transparent bg-white hover:bg-mist dark:bg-[#1d2835] dark:hover:bg-[#243140]"
               }`}
             >
-              <p className="text-sm font-medium text-ink">既存ノートの続きとして追加</p>
-              <p className="mt-1 text-xs leading-6 text-ink/60">
+              <p className="text-sm font-medium text-ink dark:text-white">既存ノートの続きとして追加</p>
+              <p className="mt-1 text-xs leading-6 text-ink/60 dark:text-slate-300">
                 選んだノートに新しい Session として追加し、続きの対話として残します。
               </p>
             </button>
           </div>
           {saveMode === "existing" ? (
-            <label className="block space-y-2 rounded-2xl bg-white p-4">
-              <span className="text-sm font-medium text-ink">続きとして追加するノートを選ぶ</span>
+            <label className="block space-y-2 rounded-2xl border border-transparent bg-white p-4 dark:border-[#314155] dark:bg-[#18212d]" style={theme === "dark" ? { backgroundColor: "#18212d" } : undefined}>
+              <span className="text-sm font-medium text-ink dark:text-white">続きとして追加するノートを選ぶ</span>
               <select
                 value={selectedExistingNoteId}
                 onChange={(event) => setSelectedExistingNoteId(event.target.value)}
-                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay"
+                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay dark:border-white/10 dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
               >
                 {activeNotes.map((note) => (
                   <option key={note.id} value={note.id}>
@@ -414,7 +416,7 @@ export function ImportWorkbench() {
                   </option>
                 ))}
               </select>
-              <p className="text-xs leading-6 text-ink/55">
+              <p className="text-xs leading-6 text-ink/55 dark:text-slate-200">
                 保存すると、新しいノートは作られず、この会話が選んだノートの Session として追加されます。
               </p>
             </label>
@@ -422,18 +424,18 @@ export function ImportWorkbench() {
         </div>
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium">タイトル</span>
+          <span className="text-sm font-medium dark:text-white">タイトル</span>
           <input
             value={preview.title}
             onChange={(event) => setPreview((current) => ({ ...current, title: event.target.value }))}
-            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay"
+            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay dark:border-white/10 dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
           />
         </label>
 
         {saveMode === "new" ? (
           <>
             <label className="block space-y-2">
-              <span className="text-sm font-medium">状態</span>
+              <span className="text-sm font-medium dark:text-white">状態</span>
               <div className="flex flex-wrap gap-2">
                 {workflowStates.map((state) => (
                   <button
@@ -441,7 +443,7 @@ export function ImportWorkbench() {
                     type="button"
                     onClick={() => setSelectedState(state)}
                     className={`rounded-full px-3 py-1 text-xs transition ${
-                      selectedState === state ? "bg-clay text-white" : "bg-sand text-ink hover:bg-mist"
+                      selectedState === state ? "bg-clay text-white" : "bg-sand text-ink hover:bg-mist dark:bg-[#1d2835] dark:text-white dark:hover:bg-[#243140]"
                     }`}
                   >
                     {state}
@@ -451,7 +453,7 @@ export function ImportWorkbench() {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-medium">カテゴリ</span>
+              <span className="text-sm font-medium dark:text-white">カテゴリ</span>
               <input
                 list="import-category-options"
                 value={preview.category}
@@ -459,7 +461,7 @@ export function ImportWorkbench() {
                   setPreview((current) => ({ ...current, category: event.target.value as Category }))
                 }
                 placeholder="カテゴリを入力"
-                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay"
+                className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm outline-none focus:border-clay dark:border-white/10 dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
               />
               <datalist id="import-category-options">
                 {categoryOptions.map((category) => (
@@ -473,7 +475,7 @@ export function ImportWorkbench() {
                     type="button"
                     onClick={() => setPreview((current) => ({ ...current, category }))}
                     className={`rounded-full px-3 py-1 text-xs transition ${
-                      preview.category === category ? "bg-clay text-white" : "bg-sand text-ink hover:bg-mist"
+                      preview.category === category ? "bg-clay text-white" : "bg-sand text-ink hover:bg-mist dark:bg-[#1d2835] dark:text-white dark:hover:bg-[#243140]"
                     }`}
                   >
                     {category}
@@ -483,7 +485,7 @@ export function ImportWorkbench() {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-medium">タグ</span>
+              <span className="text-sm font-medium dark:text-white">タグ</span>
               <div className="flex flex-wrap gap-2">
                 {fixedTags.map((tag) => {
                   const selected = selectedTags.includes(tag);
@@ -497,7 +499,7 @@ export function ImportWorkbench() {
                         )
                       }
                       className={`rounded-full px-3 py-1 text-xs transition ${
-                        selected ? "bg-clay text-white" : "bg-sand text-ink hover:bg-mist"
+                        selected ? "bg-clay text-white" : "bg-sand text-ink hover:bg-mist dark:bg-[#1d2835] dark:text-white dark:hover:bg-[#243140]"
                       }`}
                     >
                       {tag}
@@ -510,27 +512,27 @@ export function ImportWorkbench() {
         ) : null}
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium">問い</span>
+          <span className="text-sm font-medium dark:text-white">問い</span>
           <textarea
             value={preview.question}
             onChange={(event) => setPreview((current) => ({ ...current, question: event.target.value }))}
             rows={4}
-            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm leading-6 outline-none focus:border-clay"
+            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm leading-6 outline-none focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
           />
         </label>
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium">答えの要点</span>
+          <span className="text-sm font-medium dark:text-white">答えの要点</span>
           <textarea
             value={preview.answerSummary}
             onChange={(event) => setPreview((current) => ({ ...current, answerSummary: event.target.value }))}
             rows={6}
-            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm leading-6 outline-none focus:border-clay"
+            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm leading-6 outline-none focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
           />
         </label>
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium">残った疑問</span>
+          <span className="text-sm font-medium dark:text-white">残った疑問</span>
           <textarea
             value={preview.unresolvedQuestions.join("\n")}
             onChange={(event) =>
@@ -541,7 +543,7 @@ export function ImportWorkbench() {
             }
             rows={5}
             placeholder={"疑問を1行ずつ入力\n例: エントロピーの意味づけ\n例: 数学的導出"}
-            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm leading-6 outline-none focus:border-clay"
+            className="w-full rounded-2xl border border-mist bg-sand px-4 py-3 text-sm leading-6 outline-none focus:border-clay dark:border-[#314155] dark:bg-[#18212d] dark:text-white dark:focus:border-[#d79374]"
           />
         </label>
 

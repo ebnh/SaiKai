@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useReducer } from "react";
-import type { Category, FixedTag, Note, NoteInput, Session, WorkflowState } from "@/lib/types";
+import { NoteSchema, type Category, type FixedTag, type Note, type NoteInput, type Session, type WorkflowState } from "@/lib/types";
 import { normalizeCategory, normalizeFixedTags, uniqueStrings } from "@/lib/utils";
 import { localNotesRepository } from "@/repositories/local-notes-repository";
 
@@ -24,6 +24,7 @@ type NotesContextValue = NotesState & {
       tags?: FixedTag[];
     }
   ) => Promise<void>;
+  importNotes: (notes: unknown[]) => Promise<{ importedCount: number }>;
   trashNotes: (ids: string[]) => Promise<void>;
   restoreNotes: (ids: string[]) => Promise<void>;
   deleteNotes: (ids: string[]) => Promise<void>;
@@ -120,6 +121,31 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
 
         await localNotesRepository.saveMany(updated);
         await refresh();
+      },
+      async importNotes(importedNotes) {
+        const parsedNotes = importedNotes.map((item) => NoteSchema.parse(item));
+        const merged = [...state.notes];
+
+        for (const imported of parsedNotes) {
+          const existingIndex = merged.findIndex((note) => note.id === imported.id);
+          const normalized = existingIndex >= 0
+            ? {
+                ...imported,
+                createdAt: merged[existingIndex].createdAt,
+                updatedAt: new Date().toISOString()
+              }
+            : imported;
+
+          if (existingIndex >= 0) {
+            merged[existingIndex] = normalized;
+          } else {
+            merged.unshift(normalized);
+          }
+        }
+
+        await localNotesRepository.saveMany(merged);
+        await refresh();
+        return { importedCount: parsedNotes.length };
       },
       async trashNotes(ids) {
         await localNotesRepository.trash(ids);

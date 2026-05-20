@@ -18,7 +18,7 @@ export function NoteDetailScreen() {
   return (
     <AppShell activeCount={activeCount} trashCount={trashCount}>
       {!isLoaded ? (
-        <div className="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-card">読み込み中...</div>
+        <div className="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-card dark:border-[#314155] dark:bg-[#18212d]">読み込み中...</div>
       ) : note ? (
         <NoteDetail note={note} />
       ) : (
