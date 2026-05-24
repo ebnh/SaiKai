@@ -509,7 +509,7 @@ export function ResumePromptBuilderScreen() {
                     }`}
                     style={theme === "dark" ? { color: "#f8fafc" } : undefined}
                   >
-                    {style}
+                    <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{style}</span>
                   </button>
                 ))}
               </div>
@@ -528,7 +528,7 @@ export function ResumePromptBuilderScreen() {
                     }`}
                     style={theme === "dark" ? { color: "#f8fafc" } : undefined}
                   >
-                    {depth}
+                    <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{depth}</span>
                   </button>
                 ))}
               </div>
@@ -568,12 +568,18 @@ export function ResumePromptBuilderScreen() {
 
           <div className="rounded-[32px] border border-ink/10 bg-[linear-gradient(180deg,rgba(245,242,235,0.98),rgba(231,238,246,0.92))] p-5 md:p-6 dark:border-[#314155] dark:bg-none dark:bg-[#10161d]">
             <div className="flex flex-wrap gap-2">
-              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{selectedResumeMode}</Pill>
-              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{selectedAnswerStyle}</Pill>
-              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{selectedDepth}</Pill>
+              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
+                <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedResumeMode}</span>
+              </Pill>
+              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
+                <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedAnswerStyle}</span>
+              </Pill>
+              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
+                <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedDepth}</span>
+              </Pill>
             </div>
             <div className="mt-4 rounded-[24px] border border-white/70 bg-white/80 p-5 md:p-6 dark:border-[#314155] dark:bg-[#18212d]">
-              <p className="whitespace-pre-wrap text-sm leading-8 text-ink/85 dark:text-slate-200">{generatedPrompt}</p>
+              <p className="whitespace-pre-wrap text-sm leading-8 text-ink/85 dark:text-slate-200" style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{generatedPrompt}</p>
             </div>
           </div>
         </SectionCard>
@@ -594,9 +600,15 @@ export function ResumePromptBuilderScreen() {
               {promptLogs.map((log) => (
                 <div key={log.id} className="rounded-[24px] border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-[#18212d]">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100">{log.resumeMode}</Pill>
-                    <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]">{log.answerStyle}</Pill>
-                    <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>{log.depth}</Pill>
+                    <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100" style={theme === "dark" ? { color: "#dff7e7", backgroundColor: "#334235" } : undefined}>
+                      <span style={theme === "dark" ? { color: "#dff7e7" } : undefined}>{log.resumeMode}</span>
+                    </Pill>
+                    <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]" style={theme === "dark" ? { color: "#f0b394", backgroundColor: "#4b3934" } : undefined}>
+                      <span style={theme === "dark" ? { color: "#f0b394" } : undefined}>{log.answerStyle}</span>
+                    </Pill>
+                    <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
+                      <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{log.depth}</span>
+                    </Pill>
                   </div>
                   <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <h3 className="text-base font-semibold text-ink dark:text-white">{log.noteTitle}</h3>
@@ -607,7 +619,7 @@ export function ResumePromptBuilderScreen() {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {log.selectedTopics.map((topic) => (
                         <Pill key={topic} className="bg-white text-ink/70 dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
-                          {topic}
+                          <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{topic}</span>
                         </Pill>
                       ))}
                     </div>
