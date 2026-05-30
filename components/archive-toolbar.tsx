@@ -4,6 +4,7 @@ import Link from "next/link";
 import { fixedTags, workflowStates, type Category, type FixedTag, type SortOption, type ViewMode, type WorkflowState } from "@/lib/types";
 import { sortOptions } from "@/lib/constants";
 import { Button, SectionCard } from "@/components/ui";
+import { useTheme } from "@/providers/theme-provider";
 
 type ArchiveToolbarProps = {
   search: string;
@@ -42,6 +43,7 @@ export function ArchiveToolbar({
   onImportJson,
   currentCategory
 }: ArchiveToolbarProps) {
+  const { theme } = useTheme();
   return (
     <SectionCard className="space-y-5 overflow-hidden dark:text-slate-100">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -50,7 +52,12 @@ export function ArchiveToolbar({
           <h2 className="mt-2 text-3xl font-semibold text-slate dark:text-white">
             {currentCategory === "all" ? "すべてのノート" : `${currentCategory}のノート`}
           </h2>
-          <p className="mt-2 text-sm text-ink/60 dark:text-slate-300">探す、整える、再開する、をひとつの流れで扱える作業面です。</p>
+          <p
+            className="mt-2 text-sm text-ink/60 dark:text-slate-300"
+            style={theme === "dark" ? { color: "#e2e8f0" } : undefined}
+          >
+            探す、整える、再開する、をひとつの流れで扱える作業面です。
+          </p>
         </div>
         <div className="flex flex-wrap gap-2.5">
           <Link href="/resume/import">

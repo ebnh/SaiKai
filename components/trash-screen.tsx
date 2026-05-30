@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTheme } from "@/providers/theme-provider";
 import { AppShell } from "@/components/app-shell";
 import { NoteCard } from "@/components/note-card";
 import { Button, EmptyState, Pill, SectionCard } from "@/components/ui";
@@ -10,6 +11,7 @@ import { useNotes } from "@/providers/notes-provider";
 export function TrashScreen() {
   const { notes, restoreNotes, deleteNotes } = useNotes();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { theme } = useTheme();
 
   const activeCount = useMemo(() => notes.filter((note) => note.status === "active").length, [notes]);
   const trashedNotes = useMemo(
@@ -41,7 +43,10 @@ export function TrashScreen() {
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">ゴミ箱</p>
               <h2 className="mt-2 text-2xl font-semibold dark:text-white">復元前の保留スペース</h2>
-              <p className="mt-2 text-sm leading-6 text-ink/70 dark:text-slate-200">
+              <p
+                className="mt-2 text-sm leading-6 text-ink/70 dark:text-slate-200"
+                style={theme === "dark" ? { color: "#e2e8f0" } : undefined}
+              >
                 誤って捨てる不安を減らすため、ノートは一定期間ここに残ります。
               </p>
             </div>

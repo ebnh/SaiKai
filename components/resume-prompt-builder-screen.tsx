@@ -35,20 +35,6 @@ type ResumePageNote = {
   tags: string[];
 };
 
-type ResumePromptLog = {
-  id: string;
-  noteTitle: string;
-  resumeMode: ResumeMode;
-  answerStyle: AnswerStyle;
-  depth: Depth;
-  questionSummary: string;
-  selectedTopics: string[];
-  createdAt: string;
-  prompt: string;
-};
-
-const RESUME_PROMPT_LOG_KEY = "a_resume_prompt_logs";
-
 const resumeModes: Array<{ value: ResumeMode; description: string }> = [
   { value: "続きから学ぶ", description: "前回の理解を土台に、そのまま次の論点へ進みます。" },
   { value: "未解決点を深掘りする", description: "残っている疑問を軸に、曖昧な部分を埋めます。" },
@@ -60,24 +46,6 @@ const resumeModes: Array<{ value: ResumeMode; description: string }> = [
 
 const answerStyles: AnswerStyle[] = ["指定しない", "簡潔に", "丁寧に", "初学者向け", "厳密に", "問答形式で", "演習つきで"];
 const depthOptions: Depth[] = ["軽く確認", "標準", "深く掘り下げる"];
-
-function deriveBullets(text: string, fallbackLabel: string) {
-  const fromLines = text
-    .split(/\n+/)
-    .map((item) => item.replace(/^[-・●]\s*/, "").trim())
-    .filter(Boolean);
-
-  if (fromLines.length > 0) return fromLines.slice(0, 4);
-
-  const fromSentences = text
-    .split(/。+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-  if (fromSentences.length > 0) return fromSentences.slice(0, 4);
-
-  return [fallbackLabel];
-}
 
 function noteToResumePageNote(note: Note): ResumePageNote {
   const answerSummary = note.answerSummary.length > 0 ? note.answerSummary : ["前回の要点は1つにまとまっています"];
@@ -109,47 +77,8 @@ function noteToResumePageNote(note: Note): ResumePageNote {
   };
 }
 
-function CollapsibleList({
-  title,
-  items,
-  accent = "clay",
-  defaultExpanded = true
-}: {
-  title: string;
-  items: string[];
-  accent?: "clay" | "moss";
-  defaultExpanded?: boolean;
-}) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
-  const accentClass = accent === "clay" ? "bg-clay" : "bg-moss";
-
-  return (
-    <div className="rounded-[24px] border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-none dark:bg-[#18212d]">
-      <div className="flex items-center justify-between gap-4">
-        <h3 className="text-sm font-semibold text-ink dark:text-white">{title}</h3>
-        <button
-          type="button"
-          onClick={() => setExpanded((current) => !current)}
-          className="text-xs font-medium text-moss transition hover:text-ink dark:text-emerald-200/80 dark:hover:text-white"
-        >
-          {expanded ? "折りたたむ" : "表示する"}
-        </button>
-      </div>
-      <div className={expanded ? "mt-3" : "mt-3 line-clamp-3"}>
-        <ul className="space-y-3 text-sm leading-7 text-ink/80 dark:text-white">
-          {items.map((item) => (
-            <li key={item} className="flex gap-3">
-              <span className={`mt-2 h-1.5 w-1.5 rounded-full ${accentClass}`} />
-              <span className="dark:text-white">{item}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
 export function ResumePromptBuilderScreen() {
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const { notes } = useNotes();
@@ -170,7 +99,6 @@ export function ResumePromptBuilderScreen() {
   const [selectedDepth, setSelectedDepth] = useState<Depth>("標準");
   const [extraCondition, setExtraCondition] = useState("");
   const [copiedState, setCopiedState] = useState(false);
-  const [promptLogs, setPromptLogs] = useState<ResumePromptLog[]>([]);
 
   const selectedNote = useMemo(
     () => savedNotes.find((note) => note.id === selectedNoteId) ?? savedNotes[0] ?? null,
@@ -202,19 +130,6 @@ export function ResumePromptBuilderScreen() {
       return matched;
     });
   }, [selectedNote]);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(RESUME_PROMPT_LOG_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as ResumePromptLog[];
-      if (Array.isArray(parsed)) {
-        setPromptLogs(parsed);
-      }
-    } catch {
-      setPromptLogs([]);
-    }
-  }, []);
 
   if (!selectedNote) {
     return (
@@ -283,23 +198,6 @@ export function ResumePromptBuilderScreen() {
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(generatedPrompt);
-      const nextLog: ResumePromptLog = {
-        id: crypto.randomUUID(),
-        noteTitle: selectedNote.title,
-        resumeMode: selectedResumeMode,
-        answerStyle: selectedAnswerStyle,
-        depth: selectedDepth,
-        questionSummary: currentQuestion.trim() || "前回の続きから説明してほしい",
-        selectedTopics: selectedUnresolvedQuestions,
-        createdAt: new Date().toISOString(),
-        prompt: generatedPrompt
-      };
-      setPromptLogs((current) => {
-        const deduped = current.filter((item) => item.prompt !== nextLog.prompt);
-        const next = [nextLog, ...deduped].slice(0, 8);
-        window.localStorage.setItem(RESUME_PROMPT_LOG_KEY, JSON.stringify(next));
-        return next;
-      });
       setCopiedState(true);
       window.setTimeout(() => setCopiedState(false), 1800);
     } catch {
@@ -387,49 +285,60 @@ export function ResumePromptBuilderScreen() {
           </div>
         </SectionCard>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <SectionCard className="space-y-5">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">保存済みノート</p>
-                <h2 className="mt-2 text-xl font-semibold dark:text-white">前回までの文脈</h2>
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">再開用プロンプト</p>
+                <h2 className="mt-2 text-2xl font-semibold dark:text-white">今このまま外部AIへ貼れる形にする</h2>
+                <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
+                  今回の条件をその場で反映しながら、外部AIへそのまま渡せる文面に整えます。
+                </p>
               </div>
-              <Button variant="ghost">元チャットを表示</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" onClick={handleCopy}>
+                  {copiedState ? "コピーしました" : "コピー"}
+                </Button>
+                <Button variant="ghost" onClick={resetConditions}>
+                  条件をリセット
+                </Button>
+              </div>
             </div>
 
-            <div className="rounded-[28px] border border-mist/80 bg-[linear-gradient(180deg,rgba(247,244,238,0.95),rgba(255,255,255,0.82))] p-5 dark:border-[#314155] dark:bg-none dark:bg-[#18212d]">
-              <div className="flex flex-wrap items-center gap-2">
-                <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]">{selectedNote.category}</Pill>
-                <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100">
-                  保存済みノート
+            <div className="rounded-[32px] border border-ink/10 bg-[linear-gradient(180deg,rgba(245,242,235,0.98),rgba(231,238,246,0.92))] p-5 md:p-6 dark:border-[#314155] dark:bg-none dark:bg-[#10161d]">
+              <div className="flex flex-wrap gap-2">
+                <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
+                  <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedResumeMode}</span>
+                </Pill>
+                <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
+                  <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedAnswerStyle}</span>
+                </Pill>
+                <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
+                  <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedDepth}</span>
                 </Pill>
               </div>
-              <h3 className="mt-4 text-2xl font-semibold text-ink dark:text-white">{selectedNote.title}</h3>
-              <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-ink/45 dark:text-slate-400">元の問い</p>
-              <p className="mt-2 text-sm leading-7 text-ink/80 dark:text-white">{selectedNote.question}</p>
+              <div className="mt-4 rounded-[24px] border border-white/70 bg-white/80 p-5 md:p-6 dark:border-[#314155] dark:bg-[#18212d]">
+                <p className="whitespace-pre-wrap text-sm leading-8 text-ink/85 dark:text-slate-200" style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{generatedPrompt}</p>
+              </div>
             </div>
-
-            <CollapsibleList title="答えの要点" items={selectedNote.answerSummary} accent="clay" />
-
-            <CollapsibleList title="残った疑問" items={selectedNote.unresolvedQuestions} accent="moss" />
-
-            <CollapsibleList title="理解状態" items={selectedNote.understandingState} accent="clay" defaultExpanded={false} />
-
-            <CollapsibleList
-              title="次に掘れそうな方向"
-              items={selectedNote.nextDirections}
-              accent="moss"
-              defaultExpanded={false}
-            />
           </SectionCard>
 
           <SectionCard className="space-y-5">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">今回の再開条件</p>
               <h2 className="mt-2 text-xl font-semibold dark:text-white">今回の意図を足していく</h2>
-              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100">
-                前回の理解を見ながら、今知りたいことと回答の望み方をここで整えます。
+              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
+                選んだノートの続きをどう進めたいかだけを、ここで整えます。
               </p>
+            </div>
+
+            <div className="rounded-[24px] border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-[#18212d]">
+              <div className="flex flex-wrap gap-2">
+                <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]">{selectedNote.category}</Pill>
+                <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100">{selectedNote.workflowStateLabel}</Pill>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold text-ink dark:text-white">{selectedNote.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>{summarizeForCard(selectedNote.question, 140)}</p>
             </div>
 
             <div className="space-y-2">
@@ -546,93 +455,7 @@ export function ResumePromptBuilderScreen() {
           </SectionCard>
         </div>
 
-        <SectionCard className="space-y-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">再開用プロンプト</p>
-              <h2 className="mt-2 text-2xl font-semibold dark:text-white">今このまま外部AIへ貼れる形にする</h2>
-              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
-                左の文脈と右の条件を合成して、今回の目的が伝わる1本の再開文を作ります。
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="secondary" onClick={handleCopy}>
-                {copiedState ? "コピーしました" : "コピー"}
-              </Button>
-              <Button onClick={handleOpenResumedImport}>新しい対話を取り込むへ進む</Button>
-              <Button variant="ghost" onClick={resetConditions}>
-                条件をリセット
-              </Button>
-            </div>
-          </div>
 
-          <div className="rounded-[32px] border border-ink/10 bg-[linear-gradient(180deg,rgba(245,242,235,0.98),rgba(231,238,246,0.92))] p-5 md:p-6 dark:border-[#314155] dark:bg-none dark:bg-[#10161d]">
-            <div className="flex flex-wrap gap-2">
-              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
-                <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedResumeMode}</span>
-              </Pill>
-              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
-                <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedAnswerStyle}</span>
-              </Pill>
-              <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
-                <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{selectedDepth}</span>
-              </Pill>
-            </div>
-            <div className="mt-4 rounded-[24px] border border-white/70 bg-white/80 p-5 md:p-6 dark:border-[#314155] dark:bg-[#18212d]">
-              <p className="whitespace-pre-wrap text-sm leading-8 text-ink/85 dark:text-slate-200" style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{generatedPrompt}</p>
-            </div>
-          </div>
-        </SectionCard>
-
-        <SectionCard className="space-y-4">
-          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-moss">再開ログ</p>
-              <h2 className="mt-2 text-xl font-semibold dark:text-white">直近で使った再開パターン</h2>
-              <p className="mt-2 text-sm leading-7 text-ink/70 dark:text-slate-100" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
-                コピーした再開用プロンプトだけを軽いログとして残します。本体ノートとは別扱いです。
-              </p>
-            </div>
-          </div>
-
-          {promptLogs.length > 0 ? (
-            <div className="grid gap-3">
-              {promptLogs.map((log) => (
-                <div key={log.id} className="rounded-[24px] border border-mist/80 bg-sand/55 p-4 dark:border-[#314155] dark:bg-[#18212d]">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Pill className="bg-moss/10 text-moss dark:bg-[#334235] dark:text-emerald-100" style={theme === "dark" ? { color: "#dff7e7", backgroundColor: "#334235" } : undefined}>
-                      <span style={theme === "dark" ? { color: "#dff7e7" } : undefined}>{log.resumeMode}</span>
-                    </Pill>
-                    <Pill className="bg-clay/10 text-clay dark:bg-[#b86f5226] dark:text-[#f0b394]" style={theme === "dark" ? { color: "#f0b394", backgroundColor: "#4b3934" } : undefined}>
-                      <span style={theme === "dark" ? { color: "#f0b394" } : undefined}>{log.answerStyle}</span>
-                    </Pill>
-                    <Pill className="dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
-                      <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{log.depth}</span>
-                    </Pill>
-                  </div>
-                  <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                    <h3 className="text-base font-semibold text-ink dark:text-white">{log.noteTitle}</h3>
-                    <p className="text-xs text-ink/45 dark:text-slate-400">{formatDate(log.createdAt)}</p>
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-ink/78 dark:text-slate-200">{summarizeForCard(log.questionSummary, 110)}</p>
-                  {log.selectedTopics.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {log.selectedTopics.map((topic) => (
-                        <Pill key={topic} className="bg-white text-ink/70 dark:bg-[#223041] dark:text-white" style={theme === "dark" ? { color: "#f8fafc", backgroundColor: "#223041" } : undefined}>
-                          <span style={theme === "dark" ? { color: "#f8fafc" } : undefined}>{topic}</span>
-                        </Pill>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-[24px] border border-dashed border-mist bg-sand/40 p-5 text-sm leading-7 text-ink/60 dark:border-[#314155] dark:bg-none dark:bg-[#18212d] dark:text-slate-200">
-              まだ履歴はありません。再開用プロンプトをコピーすると、ここに直近の再開ログが残ります。
-            </div>
-          )}
-        </SectionCard>
       </div>
     </AppShell>
   );

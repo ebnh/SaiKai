@@ -330,7 +330,7 @@ export function ImportWorkbench() {
                 </Button>
                 <Pill>再生成 {regenerateCount} / {MAX_REGENERATE_COUNT}</Pill>
               </div>
-              <p className="text-xs leading-6 text-ink/55 dark:text-slate-200">
+              <p className="text-xs leading-6 text-ink/55 dark:text-slate-200" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 再生成では API 利用料金が発生する場合があります。保存前の再生成は最大 {MAX_REGENERATE_COUNT} 回、各回の後に {REGENERATE_COOLDOWN_SECONDS} 秒の待機があります。
               </p>
             </div>
@@ -368,7 +368,7 @@ export function ImportWorkbench() {
         <div className="space-y-3 rounded-2xl border border-transparent bg-sand p-4 dark:border-[#314155] dark:bg-[#18212d]" style={theme === "dark" ? { backgroundColor: "#18212d" } : undefined}>
           <div className="space-y-1">
             <p className="text-sm font-medium text-ink dark:text-white">どこに保存するか</p>
-            <p className="text-xs leading-6 text-ink/60 dark:text-slate-200">
+            <p className="text-xs leading-6 text-ink/60 dark:text-slate-200" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
               新しいテーマとして保存するか、すでにあるノートの続きとして追加するかを選びます。
             </p>
           </div>
@@ -383,7 +383,7 @@ export function ImportWorkbench() {
               }`}
             >
               <p className="text-sm font-medium text-ink dark:text-white">新しいノートとして保存</p>
-              <p className="mt-1 text-xs leading-6 text-ink/60 dark:text-slate-300">
+              <p className="mt-1 text-xs leading-6 text-ink/60 dark:text-slate-300" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 今回の会話を独立した1冊のノートとして保存します。
               </p>
             </button>
@@ -397,7 +397,7 @@ export function ImportWorkbench() {
               }`}
             >
               <p className="text-sm font-medium text-ink dark:text-white">既存ノートの続きとして追加</p>
-              <p className="mt-1 text-xs leading-6 text-ink/60 dark:text-slate-300">
+              <p className="mt-1 text-xs leading-6 text-ink/60 dark:text-slate-300" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 選んだノートに新しい Session として追加し、続きの対話として残します。
               </p>
             </button>
@@ -416,7 +416,7 @@ export function ImportWorkbench() {
                   </option>
                 ))}
               </select>
-              <p className="text-xs leading-6 text-ink/55 dark:text-slate-200">
+              <p className="text-xs leading-6 text-ink/55 dark:text-slate-200" style={theme === "dark" ? { color: "#e2e8f0" } : undefined}>
                 保存すると、新しいノートは作られず、この会話が選んだノートの Session として追加されます。
               </p>
             </label>
